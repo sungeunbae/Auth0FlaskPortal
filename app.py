@@ -3,7 +3,7 @@
 #import constants
 
 import http.client
-import json
+
 
 from werkzeug.exceptions import HTTPException
 from werkzeug.exceptions import Unauthorized
@@ -11,10 +11,10 @@ from werkzeug.exceptions import Unauthorized
 
 from flask import Flask
 from flask import jsonify
-from flask import redirect
 
-from flask import session
-from flask import url_for
+
+#from flask import session
+
 from flask import request
 from flask import _request_ctx_stack
 from flask_sqlalchemy import SQLAlchemy
@@ -64,6 +64,7 @@ auth = Auth(main_app)
 
 
 from routes import *
+from models import *
 
 @main_app.shell_context_processor
 def make_shell_context():

@@ -1,8 +1,9 @@
-from flask_sqlalchemy import SQLAlchemy
+
 from sqlalchemy import create_engine, MetaData, Table
 from sqlalchemy.orm import mapper, sessionmaker
-
-
+from app import main_app
+from flask import session
+from constants import JWT_PAYLOAD
 
 class User(object):
     pass
@@ -11,7 +12,7 @@ def get_user_id():
     return session[JWT_PAYLOAD]['sub']
 
 def loadSession():
-    engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'], echo=True)
+    engine = create_engine(main_app.config['SQLALCHEMY_DATABASE_URI'], echo=True)
     metadata = MetaData(engine)
     users = Table('User', metadata, autoload=True)
     mapper(User, users)

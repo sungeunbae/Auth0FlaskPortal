@@ -5,9 +5,12 @@ from authlib.client import OAuth2Session
 from authlib.flask.client import OAuth
 from jose import JWTError, jwt
 from functools import wraps
+from flask import session
+from six.moves.urllib.request import urlopen
+
+import json
 
 
-JWT_ALGORITHM = "RS256"
 
 ENV_FILE = find_dotenv()
 if ENV_FILE:
@@ -26,26 +29,13 @@ MYSQL_IP = env.get(constants.MYSQL_IP)
 MYSQL_DB = env.get(constants.MYSQL_DB)
 
 SCOPE = 'openid profile '# groups roles permissions read:eaonly read:devonly' #we don't need to request all these scopes. All scopes authorized for the user is auto-added by the rule created by (*) above.
-JWT_PAYLOAD = 'jwt_payload'
-TOKEN_KEY = 'auth0_token'
-MGMNT_API_TOKEN = 'mgmnt_api_token'
+
 
 ISSUER = "https://"+AUTH0_DOMAIN+"/"
 #Needs API setup  https://auth0.com/docs/quickstart/backend/python#validate-access-tokens
 
 
-JWT_VERIFY_DEFAULTS = {
-    'verify_signature': True,
-    'verify_aud': True,
-    'verify_iat': True,
-    'verify_exp': True,
-    'verify_nbf': True,
-    'verify_iss': True,
-    'verify_sub': True,
-    'verify_jti': True,
-    'verify_at_hash': True,
-    'leeway': 0,
-}
+
 
 class Auth:
     def __init__(self, app):
@@ -123,7 +113,7 @@ def __decode_token(token):
     if rsa_key:
         try:
             #this verifies everything. 
-            payload = jwt.decode(token, rsa_key, algorithms=[JWT_ALGORITHM], issuer=ISSUER, audience=AUTH0_AUDIENCE, options = JWT_VERIFY_DEFAULTS)
+            payload = jwt.decode(token, rsa_key, algorithms=[constants.JWT_ALGORITHM], issuer=ISSUER, audience=AUTH0_AUDIENCE, options = constants.JWT_VERIFY_DEFAULTS)
         except jwt.ExpiredSignatureError:
             raise Exception({"code":"token_expired",
                              "description": "token is expired"}, 401)
@@ -154,7 +144,7 @@ def requires_scope(required_scope):
     def require_scope(f):
         @wraps(f)
         def decorated(*args, **kwargs):
-            token = session[TOKEN_KEY]["access_token"]
+            token = session[constants.TOKEN_KEY]["access_token"]
             unverified_claims = jwt.get_unverified_claims(token)
             print(unverified_claims)
             if unverified_claims.get("scope"):
@@ -171,9 +161,9 @@ def requires_scope(required_scope):
 def requires_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        if JWT_PAYLOAD not in session:
+        if constants.JWT_PAYLOAD not in session:
             return redirect('/login')
-        token = session[TOKEN_KEY]
+        token = session[constants.TOKEN_KEY]
         token_decoded = __decode_token(token["access_token"])
        # _request_ctx_stack.top.current_user = token_decoded #not sure about this one - seems unnecessary.
         return f(*args, **kwargs)
@@ -184,7 +174,7 @@ def requires_auth(f):
 def requires_admin(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        token = session[TOKEN_KEY]["access_token"]
+        token = session[constants.TOKEN_KEY]["access_token"]
 #           print(token)
         unverified_claims = jwt.get_unverified_claims(token)
         print(unverified_claims)
@@ -192,10 +182,10 @@ def requires_admin(f):
             token_scopes = unverified_claims["scope"].split()
             for token_scope in token_scopes:
                 if token_scope == "admin":
-                    mgmnt_token = session.get(MGMNT_API_TOKEN,None)
+                    mgmnt_token = session.get(constants.MGMNT_API_TOKEN,None)
                     if mgmnt_token is None:
-                        session[MGMNT_API_TOKEN] = fetch_mgmnt_api_token()
-                    print(session[MGMNT_API_TOKEN])
+                        session[constants.MGMNT_API_TOKEN] = fetch_mgmnt_api_token()
+                    print(session[constants.MGMNT_API_TOKEN])
                     return f(*args, **kwargs)
         raise Exception({"code": "Unauthorized", "description": "You don't have access to this resource"},403)
     return decorated
