@@ -1,0 +1,73 @@
+
+
+#import constants
+
+import http.client
+import json
+
+from werkzeug.exceptions import HTTPException
+from werkzeug.exceptions import Unauthorized
+
+
+from flask import Flask
+from flask import jsonify
+from flask import redirect
+
+from flask import session
+from flask import url_for
+from flask import request
+from flask import _request_ctx_stack
+from flask_sqlalchemy import SQLAlchemy
+from flask_session import Session
+
+
+
+import sys
+
+
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
+from werkzeug.exceptions import NotFound
+
+
+from authenticate import MYSQL_USERNAME,MYSQL_PASSWORD,MYSQL_IP,MYSQL_DB, Auth
+
+
+main_app = Flask(__name__, static_url_path='/public', static_folder='./public')
+
+
+
+from apps import app1, app2, app3
+
+main_app.wsgi_app = DispatcherMiddleware(main_app.wsgi_app, {
+    "/{}/app1".format(app1.app.permission): app1.app,
+    '/{}/app2'.format(app2.app.permission): app2.app,
+    '/{}/app3'.format(app3.app.permission): app3.app
+})
+
+
+main_app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://{}:{}@{}/{}'.format(MYSQL_USERNAME,MYSQL_PASSWORD,MYSQL_IP,MYSQL_DB)
+main_app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
+
+db = SQLAlchemy(main_app)
+db.init_app(main_app)
+SESSION_TYPE='filesystem'
+SESSION_PERMANENT=False
+main_app.config.from_object(__name__)
+#main_app.secret_key = constants.SECRET_KEY
+main_app.debug = True
+Session(main_app) #supports for Server-side Session. Optional
+
+#
+
+auth = Auth(main_app)
+
+
+
+from routes import *
+
+@main_app.shell_context_processor
+def make_shell_context():
+    """
+    Run `FASK_APP=app.py; flask shell` for an interpreter with local structures.
+    """
+    return {'db': db, 'User': models.User}

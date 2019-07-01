@@ -1,12 +1,19 @@
-from flask import Flask
+PERMISSION= "eap"
+
+from authflask import AuthFlask
+
+app = AuthFlask(__name__,permission=PERMISSION)
 
 
-app = Flask(__name__)
-
-
-@app.route('/')
+@app.route('/') 
 def hello_world():
-    return 'Hello World! from App2'
+        return 'Hello World from {} : {} permission needed.'.format(app.import_name, app.permission)
 
 if __name__ == '__main__':
-	app.run()
+    app.run()
+
+
+
+
+
+    
