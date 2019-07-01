@@ -6,6 +6,7 @@ from authlib.flask.client import OAuth
 from jose import JWTError, jwt
 from functools import wraps
 from flask import session
+from flask import redirect
 from six.moves.urllib.request import urlopen
 
 import json
@@ -33,7 +34,6 @@ SCOPE = 'openid profile '# groups roles permissions read:eaonly read:devonly' #w
 
 ISSUER = "https://"+AUTH0_DOMAIN+"/"
 #Needs API setup  https://auth0.com/docs/quickstart/backend/python#validate-access-tokens
-
 
 
 
@@ -69,7 +69,7 @@ class Auth:
 
 def fetch_mgmnt_api_token():
     __session = OAuth2Session(AUTH0_CLIENT_ID,AUTH0_CLIENT_SECRET) #need a new session to get the token for Mgmnt API
-    token = __session.fetch_access_token(AUTH0_BASE_URL + '/oauth/token', grant_type='client_credentials', audience=auth0.api_base_url +'/api/v2/')
+    token = __session.fetch_access_token(AUTH0_BASE_URL + '/oauth/token', grant_type='client_credentials', audience=AUTH0_BASE_URL +'/api/v2/')
 
     #Alternatively, can use the routine below...
     # conn = http.client.HTTPSConnection("seistech.auth0.com:443")
@@ -135,7 +135,7 @@ def __decode_token(token):
     return payload # Not sure if signature must be still validated..
 
 
-def requires_scope(required_scope):
+def requires_scope(required_scope): 
     """Determines if the required scope is present in the access token
     Args:
         required_scope (str): The scope required to access the resource
@@ -144,6 +144,7 @@ def requires_scope(required_scope):
     def require_scope(f):
         @wraps(f)
         def decorated(*args, **kwargs):
+            print(session)
             token = session[constants.TOKEN_KEY]["access_token"]
             unverified_claims = jwt.get_unverified_claims(token)
             print(unverified_claims)

@@ -1,22 +1,23 @@
-
+import http.client
 from six.moves.urllib.parse import urlencode
 
 #from urllib.parse import urlencode
 import six
 
 from flask_cors import cross_origin
-from flask import render_template
-from flask import url_for
+from flask import jsonify
 from flask import redirect
+from flask import render_template
 from flask import session
+from flask import url_for
 
 import json
 from app import main_app, auth
-from authenticate import requires_auth, requires_scope, requires_admin, AUTH0_CALLBACK_URL, AUTH0_AUDIENCE, AUTH0_CLIENT_ID 
+from authenticate import requires_auth, requires_scope, requires_admin, AUTH0_CALLBACK_URL, AUTH0_AUDIENCE, AUTH0_CLIENT_ID, AUTH0_DOMAIN 
 
 from models import dbsession, get_user_id
 
-from constants import JWT_PAYLOAD, TOKEN_KEY
+from constants import JWT_PAYLOAD, TOKEN_KEY, MGMNT_API_TOKEN
 # Controllers API
 @main_app.route('/')
 def home():
