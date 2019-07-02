@@ -1,4 +1,4 @@
-import http.client
+
 from six.moves.urllib.parse import urlencode
 
 #from urllib.parse import urlencode
@@ -128,31 +128,3 @@ def read_devonly():
     response = "Hello! You are authorized to read devonly contents"
     return jsonify(message=response)
 
-@main_app.route("/api/admin")
-@cross_origin(headers=["Content-Type", "Authorization"])
-@cross_origin(headers=["Access-Control-Allow-Origin", "http://localhost:3000"])
-@requires_auth
-@requires_admin
-def read_admin():
-    """A valid access token and an appropriate scope are required to access this route
-    """
-    return render_template('dashboard.html',
-                           userinfo=session[MGMNT_API_TOKEN],
-                           userinfo_pretty=json.dumps(session[MGMNT_API_TOKEN], indent=4))
-
-
-##this enables direct access to management API's endpoints. https://auth0.com/docs/api/management/v2 
-@main_app.route("/api/admin/<path:subpath>", methods=['GET'])
-#@cross_origin(headers=["Content-Type", "Authorization"])
-#@cross_origin(headers=["Access-Control-Allow-Origin", "http://localhost:3000"])
-@requires_auth
-@requires_admin
-def get_request_management_api(subpath):
-    conn = http.client.HTTPSConnection(AUTH0_DOMAIN+":443")
-    headers = { "Authorization":"Bearer "+session[MGMNT_API_TOKEN], 'content-type' : "application/json"}
-    conn.request("GET", auth.auth0.api_base_url+"/api/v2/"+subpath, headers= headers)
-    res = conn.getresponse()
-    data = res.read().decode("utf-8")
-    return render_template('dashboard.html',
-                           userinfo=data,
-                           userinfo_pretty=json.dumps(json.loads(data), indent=4))

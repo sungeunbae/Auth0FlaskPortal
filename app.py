@@ -20,12 +20,13 @@ from authenticate import MYSQL_USERNAME,MYSQL_PASSWORD,MYSQL_IP,MYSQL_DB, Auth
 
 main_app = Flask(__name__, static_url_path='/public', static_folder='./public')
 
-from apps import app1, app2, app3
+from apps import app1, app2, app3, manage
 
 main_app.wsgi_app = DispatcherMiddleware(main_app.wsgi_app, {
     "/{}/app1".format(app1.app.permission): app1.app,
     '/{}/app2'.format(app2.app.permission): app2.app,
-    '/{}/app3'.format(app3.app.permission): app3.app
+    '/{}/app3'.format(app3.app.permission): app3.app,
+    '/{}/manage'.format(manage.app.permission): manage.app,
 })
 
 

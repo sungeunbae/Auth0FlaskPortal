@@ -23,6 +23,7 @@ AUTH0_CLIENT_SECRET = env.get(constants.AUTH0_CLIENT_SECRET)
 AUTH0_DOMAIN = env.get(constants.AUTH0_DOMAIN)
 AUTH0_BASE_URL = 'https://' + AUTH0_DOMAIN
 AUTH0_AUDIENCE = env.get(constants.AUTH0_AUDIENCE)
+SECRET_KEY = env.get(constants.SECRET_KEY)
 
 MYSQL_USERNAME = env.get(constants.MYSQL_USERNAME)
 MYSQL_PASSWORD = env.get(constants.MYSQL_PASSWORD)
@@ -175,6 +176,7 @@ def requires_auth(f):
 def requires_admin(f):
     @wraps(f)
     def decorated(*args, **kwargs):
+        print(session)
         token = session[constants.TOKEN_KEY]["access_token"]
 #           print(token)
         unverified_claims = jwt.get_unverified_claims(token)
