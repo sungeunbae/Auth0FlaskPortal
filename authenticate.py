@@ -54,12 +54,6 @@ class Auth:
         )
 
 
-
-
-
-
-
-
 # @main_app.errorhandler(Exception)
 # def handle_auth_error(ex):
 #     response = jsonify(message=str(ex))
@@ -192,7 +186,7 @@ def requires_admin(f):
         if unverified_claims.get("scope"):
             token_scopes = unverified_claims["scope"].split()
             for token_scope in token_scopes:
-                if token_scope == "admin":
+                if token_scope == "access:admin":
                     mgmnt_token = session.get(constants.MGMNT_API_TOKEN,None)
                     if mgmnt_token is None:
                         session[constants.MGMNT_API_TOKEN] = fetch_mgmnt_api_token()

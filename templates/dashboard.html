@@ -11,10 +11,19 @@
         <div class="container">
             <div class="login-page clearfix">
                 <div class="logged-in-box auth0-box logged-in">
-                    <h1 id="logo"><img src="//cdn.auth0.com/samples/auth0_logo_final_blue_RGB.png" /></h1>
-                    <img class="avatar" src="{{userinfo['picture']}}"/>
-                    <h2>Welcome {{userinfo['name']}}</h2>
+                    <h1 id="logo"><img src="https://seistech.nz/static/img/seistech_long_logo.png" /></h1>
+                    <h4>{{userinfo['name']}}</h4>
                     <pre>{{userinfo_pretty}}</pre>
+                    <h4>Products</h4>
+                    <h5> 
+                        <ul style="list-style-type:circle">
+                        {% for item in products %}
+                            
+                                <li><a href= {{item[0]}}>{{ item[1] }}: {{ item[2] }}</a><br></li>
+                            
+                        {% endfor %}
+                        </ul>
+                    </h5>
                     <a id="qsLogoutBtn" class="btn btn-primary btn-lg btn-logout btn-block" href="/logout">Logout</a>
                 </div>
             </div>

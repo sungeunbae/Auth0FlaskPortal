@@ -28,7 +28,7 @@ class AuthFlask(Flask):
             elif self.permission == 'admin':
                 f=requires_admin(f)
             else:
-                f=requires_scope(self.permission)(f)
+                f=requires_scope("access:"+self.permission)(f)
             endpoint = options.pop("endpoint", None)
             self.add_url_rule(rule, endpoint, f, **options)
             return f

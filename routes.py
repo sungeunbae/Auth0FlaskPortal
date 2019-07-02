@@ -12,7 +12,7 @@ from flask import session
 from flask import url_for
 
 import json
-from app import main_app, auth
+from app import main_app, auth, all_apps_endpoints
 from authenticate import requires_auth, requires_scope, requires_admin, AUTH0_CALLBACK_URL, AUTH0_AUDIENCE, AUTH0_CLIENT_ID, AUTH0_DOMAIN 
 
 from models import dbsession, get_user_id
@@ -85,7 +85,7 @@ def logout():
 def dashboard():
     return render_template('dashboard.html',
                            userinfo=session[JWT_PAYLOAD],
-                           userinfo_pretty=json.dumps(session[JWT_PAYLOAD], indent=4))
+                           userinfo_pretty=json.dumps(session[JWT_PAYLOAD], indent=4), products=all_apps_endpoints)
 
 
 
