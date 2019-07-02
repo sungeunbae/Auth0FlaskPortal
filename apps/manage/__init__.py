@@ -7,8 +7,7 @@ from authflask import AuthFlask
 from flask import session
 from flask import render_template
 
-from app_dispatch.authenticate import AUTH0_BASE_URL,AUTH0_DOMAIN
-from app_dispatch.constants import MGMNT_API_TOKEN
+from authenticate import Auth
 
 app = AuthFlask(__name__,permission=PERMISSION)
 
@@ -19,16 +18,16 @@ def read_admin():
     """
     print(session)
     return render_template('dashboard.html',
-                           userinfo=session[MGMNT_API_TOKEN],
-                           userinfo_pretty=json.dumps(session[MGMNT_API_TOKEN], indent=4))
+                           userinfo=session[Auth.MGMNT_API_TOKEN],
+                           userinfo_pretty=json.dumps(session[Auth.MGMNT_API_TOKEN], indent=4))
 
 
 ##this enables direct access to management API's endpoints. https://auth0.com/docs/api/management/v2 
 @app.route("/<path:subpath>", methods=['GET'])
 def get_request_management_api(subpath):
-    conn = http.client.HTTPSConnection(AUTH0_DOMAIN+":443")
-    headers = { "Authorization":"Bearer "+session[MGMNT_API_TOKEN], 'content-type' : "application/json"}
-    conn.request("GET", AUTH0_BASE_URL+"/api/v2/"+subpath, headers= headers)
+    conn = http.client.HTTPSConnection(Auth.AUTH0_DOMAIN+":443")
+    headers = { "Authorization":"Bearer "+session[Auth.MGMNT_API_TOKEN], 'content-type' : "application/json"}
+    conn.request("GET", Auth.AUTH0_BASE_URL+"/api/v2/"+subpath, headers= headers)
     res = conn.getresponse()
     data = res.read().decode("utf-8")
     return render_template('dashboard.html',

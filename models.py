@@ -1,7 +1,7 @@
 
 from sqlalchemy import create_engine, MetaData, Table
 from sqlalchemy.orm import mapper, sessionmaker
-from app import main_app
+from main import main_app
 from flask import session
 from constants import JWT_PAYLOAD
 

@@ -4,7 +4,7 @@
 
 
 
-from app import main_app
+from main import main_app
 
 
 #if __name__ == "__main__":

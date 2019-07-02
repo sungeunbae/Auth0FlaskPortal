@@ -12,8 +12,8 @@ from flask import session
 from flask import url_for
 
 import json
-from app import main_app, auth, all_apps_endpoints
-from authenticate import requires_auth, requires_scope, requires_admin, AUTH0_CALLBACK_URL, AUTH0_AUDIENCE, AUTH0_CLIENT_ID, AUTH0_DOMAIN 
+from main import main_app, auth, all_apps_endpoints
+from authenticate import Auth
 
 from models import dbsession, get_user_id
 
@@ -48,7 +48,7 @@ def callback_handling():
 
 @main_app.route('/login')
 def login():
-    return auth.auth0.authorize_redirect(redirect_uri=AUTH0_CALLBACK_URL, audience=AUTH0_AUDIENCE)
+    return auth.auth0.authorize_redirect(redirect_uri=Auth.AUTH0_CALLBACK_URL, audience=Auth.AUTH0_AUDIENCE)
 
 
 @main_app.route('/logout')
@@ -60,7 +60,7 @@ def logout():
     if dbsession.is_active:
         dbsession.rollback() #TODO: we should also rollback if there was an exception...
 
-    params = {'returnTo': url_for('home', _external=True), 'client_id': AUTH0_CLIENT_ID}
+    params = {'returnTo': url_for('home', _external=True), 'client_id': Auth.AUTH0_CLIENT_ID}
     return redirect(auth.auth0.api_base_url + '/v2/logout?' + urlencode(params))
 
 # the following APIs are only possible if you created the rules for custome claims. 
@@ -81,7 +81,7 @@ def logout():
 
 
 @main_app.route('/dashboard')
-@requires_auth
+@Auth.requires_auth
 def dashboard():
     return render_template('dashboard.html',
                            userinfo=session[JWT_PAYLOAD],
@@ -98,7 +98,7 @@ def public():
     return jsonify(message=response)
 
 @main_app.route("/api/private")
-@requires_auth
+@Auth.requires_auth
 def private():
     """A valid access token is required to access this route
     """
@@ -107,7 +107,7 @@ def private():
 
 @main_app.route("/api/eaonly")
 #@requires_auth
-@requires_scope('ea')
+@Auth.requires_scope('ea')
 def read_eaonly():
     """A valid access token and an appropriate scope are required to access this route
     """
@@ -116,7 +116,7 @@ def read_eaonly():
 
 @main_app.route("/api/devonly")
 #@requires_auth
-@requires_scope('devel')
+@Auth.requires_scope('devel')
 def read_devonly():
     """A valid access token and an appropriate scope are required to access this route
     """
