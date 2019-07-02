@@ -27,11 +27,8 @@ def home():
 @main_app.route('/callback')
 def callback_handling():
     token = auth.auth0.authorize_access_token()
-
     resp = auth.auth0.get('userinfo')
     userinfo = resp.json()
-
-    print(token)
 
     session[JWT_PAYLOAD] = userinfo 
     session[TOKEN_KEY] = token
@@ -63,22 +60,6 @@ def logout():
     params = {'returnTo': url_for('home', _external=True), 'client_id': Auth.AUTH0_CLIENT_ID}
     return redirect(auth.auth0.api_base_url + '/v2/logout?' + urlencode(params))
 
-# the following APIs are only possible if you created the rules for custome claims. 
-#@main_app.route('/groups')
-#def groups():
-#    payload = session[JWT_PAYLOAD]
-#    groups = payload.get('http://seistech.nz/claims/groups')
-#    response = "groups: "+",".join(groups)
-#    return jsonify(message=response)
-#
-#@main_app.route('/roles')
-#def roles():
-#    payload = session[JWT_PAYLOAD]
-#    roles = payload.get('http://seistech.nz/claims/roles')
-#    response = "roles: "+",".join(roles)
-#    return jsonify(message=response)
-#
-
 
 @main_app.route('/dashboard')
 @Auth.requires_auth
@@ -86,9 +67,6 @@ def dashboard():
     return render_template('dashboard.html',
                            userinfo=session[JWT_PAYLOAD],
                            userinfo_pretty=json.dumps(session[JWT_PAYLOAD], indent=4), products=all_apps_endpoints)
-
-
-
 
 @main_app.route("/api/public")
 def public():
@@ -106,7 +84,6 @@ def private():
     return jsonify(message=response)
 
 @main_app.route("/api/eaonly")
-#@requires_auth
 @Auth.requires_scope('ea')
 def read_eaonly():
     """A valid access token and an appropriate scope are required to access this route
@@ -115,12 +92,10 @@ def read_eaonly():
     return jsonify(message=response)
 
 @main_app.route("/api/devonly")
-#@requires_auth
 @Auth.requires_scope('devel')
 def read_devonly():
     """A valid access token and an appropriate scope are required to access this route
     """
-
     response = "Hello! You are authorized to read devonly contents"
     return jsonify(message=response)
 

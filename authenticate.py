@@ -1,16 +1,16 @@
 import constants
-from os import environ as env
-from dotenv import load_dotenv, find_dotenv
+import json
+
 from authlib.client import OAuth2Session
 from authlib.flask.client import OAuth
-from jose import JWTError, jwt
+
+from dotenv import load_dotenv, find_dotenv
 from functools import wraps
 from flask import session
 from flask import redirect
+from jose import JWTError, jwt
+from os import environ as env
 from six.moves.urllib.request import urlopen
-
-import json
-
 
 
 class Auth:
@@ -52,13 +52,11 @@ class Auth:
             },
         )
 
-
 # @main_app.errorhandler(Exception)
 # def handle_auth_error(ex):
 #     response = jsonify(message=str(ex))
 #     response.status_code = (ex.code if isinstance(ex, HTTPException) else 500)
 #     return response
-
 
     @staticmethod
     def __fetch_mgmnt_api_token():
@@ -72,14 +70,11 @@ class Auth:
         # conn.request("POST", "https://seistech.auth0.com/oauth/token", payload, headers)
         # res = conn.getresponse()
         # token = res.read().decode("utf-8")
-        print(token)
+        
         return token['access_token'] #ok to use it without validation
 
     @staticmethod
     def __decode_token(token):
-    #    print("Gonna print the token:", file=sys.stdout)
-    #    print(jwt.get_unverified_header(token), file=sys.stdout)
-    #    print(jwt.get_unverified_claims(token), file=sys.stdout)
 
         jsonurl = urlopen("https://" + Auth.AUTH0_DOMAIN + "/.well-known/jwks.json")
         jwks = json.loads(jsonurl.read())
@@ -126,7 +121,7 @@ class Auth:
         else:
             raise Exception({"code": "invalid_header",
                              "description": "Unable to find appropriate key"}, 401)
-        return payload # Not sure if signature must be still validated..
+        return payload 
 
     @staticmethod
     def requires_scope(required_scope): 
@@ -137,13 +132,10 @@ class Auth:
         def require_scope(f):
             @wraps(f)
             def decorated(*args, **kwargs):
-
-                print(session)                  
                 token = Auth.__authenticate_token()
                 if token is None:
                     return redirect('/login') #if not even authenticated, 
                 unverified_claims = jwt.get_unverified_claims(token["access_token"])
-                print(unverified_claims)
                 if unverified_claims.get("scope"):
                     token_scopes = unverified_claims["scope"].split()
                     for token_scope in token_scopes:
@@ -178,11 +170,8 @@ class Auth:
     def requires_admin(f):
         @wraps(f)
         def decorated(*args, **kwargs):
-            print(session)
             token = session[constants.TOKEN_KEY]["access_token"]
-    #           print(token)
             unverified_claims = jwt.get_unverified_claims(token)
-            print(unverified_claims)
             if unverified_claims.get("scope"):
                 token_scopes = unverified_claims["scope"].split()
                 for token_scope in token_scopes:
@@ -190,7 +179,7 @@ class Auth:
                         mgmnt_token = session.get(constants.MGMNT_API_TOKEN,None)
                         if mgmnt_token is None:
                             session[constants.MGMNT_API_TOKEN] = Auth.__fetch_mgmnt_api_token()
-                        print(session[constants.MGMNT_API_TOKEN])
+                        
                         return f(*args, **kwargs)
             raise Exception({"code": "Unauthorized", "description": "You don't have access to this resource"},403)
         return decorated
