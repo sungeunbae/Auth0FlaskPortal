@@ -1,4 +1,4 @@
-PERMISSION= "read:eaonly"
+PERMISSION= "ea"
 
 from authflask import AuthFlask
 

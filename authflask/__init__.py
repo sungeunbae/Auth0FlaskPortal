@@ -24,7 +24,9 @@ class AuthFlask(Flask):
     def route(self, rule, **options):   
         def decorator(f):
             # This achieves the same effect as @app.route('/X') @requires_scope(xxx)
-            if self.permission == 'admin':
+            if self.permission == 'product':
+                pass
+            elif self.permission == 'admin':
                 f=requires_admin(f)
             else:
                 f=requires_scope(self.permission)(f)

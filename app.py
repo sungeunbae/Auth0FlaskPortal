@@ -15,17 +15,17 @@ from werkzeug.exceptions import Unauthorized
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 
 
-from authenticate import MYSQL_USERNAME,MYSQL_PASSWORD,MYSQL_IP,MYSQL_DB, Auth
+from authenticate import MYSQL_USERNAME,MYSQL_PASSWORD,MYSQL_IP,MYSQL_DB, Auth, SECRET_KEY
 
 
 main_app = Flask(__name__, static_url_path='/public', static_folder='./public')
 
-from apps import app1, app2, app3, manage
+from apps import devel_test, ea_test, product_test, manage
 
 main_app.wsgi_app = DispatcherMiddleware(main_app.wsgi_app, {
-    "/{}/app1".format(app1.app.permission): app1.app,
-    '/{}/app2'.format(app2.app.permission): app2.app,
-    '/{}/app3'.format(app3.app.permission): app3.app,
+    "/{}/devel_test".format(devel_test.app.permission): devel_test.app,
+    '/{}/ea_test'.format(ea_test.app.permission): ea_test.app,
+    '/{}/product_test'.format(product_test.app.permission): product_test.app,
     '/{}/manage'.format(manage.app.permission): manage.app,
 })
 
@@ -37,7 +37,7 @@ db = SQLAlchemy(main_app)
 db.init_app(main_app)
 
 main_app.config.from_object(__name__)
-main_app.secret_key = constants.SECRET_KEY
+main_app.secret_key = SECRET_KEY
 #main_app.debug = True
 #SESSION_TYPE='filesystem'
 #SESSION_PERMANENT=False

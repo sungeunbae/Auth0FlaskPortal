@@ -1,4 +1,4 @@
-PERMISSION= "read:devonly"
+PERMISSION= "devel"
 
 from authflask import AuthFlask
 
