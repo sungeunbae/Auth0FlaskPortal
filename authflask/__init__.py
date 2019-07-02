@@ -3,7 +3,7 @@ from flask import Flask
 import sys
 
 from authenticate import requires_scope, requires_admin
-from flask import session
+#from flask import session
 
 from app_dispatch.authenticate import SECRET_KEY
 
@@ -17,7 +17,6 @@ class AuthFlask(Flask):
         except KeyError:
             print("Error:{} needs a permission attribute.".format(self.__class__.__name__))
             sys.exit()
-
         super().__init__(*args, **kwargs)
         self.secret_key = SECRET_KEY
 

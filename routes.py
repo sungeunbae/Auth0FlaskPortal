@@ -53,7 +53,10 @@ def login():
 
 @main_app.route('/logout')
 def logout():
-    session.clear()
+    try:
+        session.clear()
+    except RuntimeError:
+        raise Exception("Error: no session present.")
     if dbsession.is_active:
         dbsession.rollback() #TODO: we should also rollback if there was an exception...
 
@@ -88,7 +91,6 @@ def dashboard():
 
 
 @main_app.route("/api/public")
-@cross_origin(headers=["Content-Type", "Authorization"])
 def public():
     """No access token required to access this route
     """
@@ -96,8 +98,6 @@ def public():
     return jsonify(message=response)
 
 @main_app.route("/api/private")
-@cross_origin(headers=["Content-Type", "Authorization"])
-@cross_origin(headers=["Access-Control-Allow-Origin", "http://localhost:3000"])
 @requires_auth
 def private():
     """A valid access token is required to access this route
@@ -106,10 +106,8 @@ def private():
     return jsonify(message=response)
 
 @main_app.route("/api/eaonly")
-@cross_origin(headers=["Content-Type", "Authorization"])
-@cross_origin(headers=["Access-Control-Allow-Origin", "http://localhost:3000"])
-@requires_auth
-@requires_scope('read:eaonly')
+#@requires_auth
+@requires_scope('ea')
 def read_eaonly():
     """A valid access token and an appropriate scope are required to access this route
     """
@@ -117,14 +115,14 @@ def read_eaonly():
     return jsonify(message=response)
 
 @main_app.route("/api/devonly")
-@cross_origin(headers=["Content-Type", "Authorization"])
-@cross_origin(headers=["Access-Control-Allow-Origin", "http://localhost:3000"])
-@requires_auth
-@requires_scope('read:devonly')
+#@requires_auth
+@requires_scope('devel')
 def read_devonly():
     """A valid access token and an appropriate scope are required to access this route
     """
 
     response = "Hello! You are authorized to read devonly contents"
     return jsonify(message=response)
+
+
 

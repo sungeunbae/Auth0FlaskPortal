@@ -141,13 +141,15 @@ def requires_scope(required_scope):
     Args:
         required_scope (str): The scope required to access the resource
     """
-    print(required_scope)
     def require_scope(f):
         @wraps(f)
         def decorated(*args, **kwargs):
-            print(session)
-            token = session[constants.TOKEN_KEY]["access_token"]
-            unverified_claims = jwt.get_unverified_claims(token)
+
+            print(session)                  
+            token = __authenticate_token()
+            if token is None:
+                return redirect('/login') #if not even authenticated, 
+            unverified_claims = jwt.get_unverified_claims(token["access_token"])
             print(unverified_claims)
             if unverified_claims.get("scope"):
                 token_scopes = unverified_claims["scope"].split()
@@ -160,13 +162,19 @@ def requires_scope(required_scope):
     return require_scope
 
 
+def __authenticate_token():
+    if constants.JWT_PAYLOAD not in session:
+        return None
+    token = session[constants.TOKEN_KEY]
+    token_decoded = __decode_token(token["access_token"])
+    return token
+
 def requires_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        if constants.JWT_PAYLOAD not in session:
+        token = __authenticate_token()
+        if token is None:
             return redirect('/login')
-        token = session[constants.TOKEN_KEY]
-        token_decoded = __decode_token(token["access_token"])
        # _request_ctx_stack.top.current_user = token_decoded #not sure about this one - seems unnecessary.
         return f(*args, **kwargs)
 
