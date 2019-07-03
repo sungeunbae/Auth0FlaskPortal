@@ -1,8 +1,6 @@
-PERMISSION= "devel"
-
 from authflask import AuthFlask
 
-app = AuthFlask(__name__,permission=PERMISSION)
+app = AuthFlask(__name__)
 
 
 @app.route('/') 
@@ -16,4 +14,4 @@ if __name__ == '__main__':
 
 
 
-	
+    

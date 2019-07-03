@@ -1,12 +1,10 @@
 from flask import Flask
-#from functools import wraps
+
 import sys
+import os.path
 
-#from authenticate import requires_scope, requires_admin
-#from flask import session
-
-#from app_dispatch.authenticate import SECRET_KEY
 from authenticate import Auth
+from constants import ACCESS_LEVELS
 
 class AuthFlask(Flask):
    
@@ -14,8 +12,19 @@ class AuthFlask(Flask):
         try:
             self.permission=kwargs.pop('permission')
         except KeyError:
-            print("Error:{} needs a permission attribute.".format(self.__class__.__name__))
-            sys.exit()
+            caller = sys._getframe().f_back.f_code.co_filename
+            try:
+                caller_permission = os.path.dirname(caller).split("apps")[-1].split("/")[1] #stripping the permission part from "./apps/permission/XXXX/__init__.py"
+            except IndexError:
+                print("Error: Caller {} has no clue of permission".format(caller))
+                sys.exit()
+            else:
+                if caller_permission in ACCESS_LEVELS:
+                    self.permission = caller_permission
+                else:
+                    print("Error: {} is invalid permission.".format(caller_permission))
+                    sys.exit()                  
+        
         super().__init__(*args, **kwargs)
         self.secret_key = Auth.SECRET_KEY
 
@@ -23,15 +32,17 @@ class AuthFlask(Flask):
         def decorator(f):
             # This achieves the same effect as @app.route('/X') @requires_scope(xxx)
             
-            if self.permission == 'product':
+            if self.permission == 'client':
                 pass
             elif self.permission == 'admin':
                 f=Auth.requires_admin(f)
             else:
                 print("Checking permission")
                 f=Auth.requires_scope("access:"+self.permission)(f)
-            
+         
+
             endpoint = options.pop("endpoint", None)
+            print("endpoint")
             self.add_url_rule(rule, endpoint, f, **options)
             return f
         return decorator

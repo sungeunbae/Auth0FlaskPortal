@@ -31,3 +31,5 @@ JWT_VERIFY_DEFAULTS = {
 
 TOKEN_KEY = 'auth0_token'
 MGMNT_API_TOKEN = 'mgmnt_api_token'
+
+ACCESS_LEVELS=["admin","devel","ea","client"]

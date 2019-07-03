@@ -1,8 +1,6 @@
-PERMISSION= "product"
-
 from authflask import AuthFlask
 
-app = AuthFlask(__name__,permission=PERMISSION)
+app = AuthFlask(__name__)
 
 
 @app.route('/') 

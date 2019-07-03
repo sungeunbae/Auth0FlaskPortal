@@ -1,5 +1,3 @@
-PERMISSION= "admin"
-
 import http.client
 import json
 
@@ -10,7 +8,7 @@ from flask import render_template
 from authenticate import Auth
 from constants import MGMNT_API_TOKEN
 
-app = AuthFlask(__name__,permission=PERMISSION)
+app = AuthFlask(__name__)
 
 
 @app.route("/")
