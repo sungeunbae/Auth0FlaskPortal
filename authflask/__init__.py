@@ -14,7 +14,8 @@ class AuthFlask(Flask):
         except KeyError:
             caller = sys._getframe().f_back.f_code.co_filename
             try:
-                caller_permission = os.path.dirname(caller).split("apps")[-1].split("/")[1] #stripping the permission part from "./apps/permission/XXXX/__init__.py"
+                #stripping the permission part from "./apps/permission/XXXX/__init__.py"
+                caller_permission = os.path.dirname(caller).split("apps")[-1].split("/")[1] 
             except IndexError:
                 print("Error: Caller {} has no clue of permission".format(caller))
                 sys.exit()

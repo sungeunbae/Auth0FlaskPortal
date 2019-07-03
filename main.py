@@ -67,8 +67,10 @@ main_app.secret_key = Auth.SECRET_KEY
 auth = Auth(main_app)
 
 
-from models import *
+from models import * #dbSession
 from routes import *
+from errors import *
+  
 
 
 @main_app.shell_context_processor
