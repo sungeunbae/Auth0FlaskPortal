@@ -60,13 +60,25 @@ def logout():
     params = {'returnTo': url_for('home', _external=True), 'client_id': Auth.AUTH0_CLIENT_ID}
     return redirect(auth.auth0.api_base_url + '/v2/logout?' + urlencode(params))
 
+def __translate_access_level(access_level):
+    user_level = "User level: "     
+    if 'admin' in access_level:
+        user_level += "Almighty Admin"
+    elif 'ea' in access_level:
+        user_level += "Early Adopter"
+    else:
+        user_level += "Paid User"
+    return user_level
 
 @main_app.route('/dashboard')
 @Auth.requires_auth
 def dashboard():
+    access_level=auth.get_access_level()
+    filtered_apps_endpoints = [(ep,acl,name) for (ep,acl,name) in all_apps_endpoints if acl in access_level]
+    priv_string = __translate_access_level(access_level)
     return render_template('dashboard.html',
                            userinfo=session[JWT_PAYLOAD],
-                           userinfo_pretty=json.dumps(session[JWT_PAYLOAD], indent=4), products=all_apps_endpoints)
+                           userinfo_pretty=json.dumps(priv_string, indent=4), products=filtered_apps_endpoints)
 
 @main_app.route("/api/public")
 def public():

@@ -52,6 +52,19 @@ class Auth:
             },
         )
 
+    def get_access_level(self):
+        scopes = self.__get_scopes()
+        access_level=[x.split("access:")[1] for x in scopes if x.find("access:")>=0]
+        return ["client"] + access_level
+
+    def __get_scopes(self):
+        token_scopes = []
+        token = Auth.__authenticate_token()
+        unverified_claims = jwt.get_unverified_claims(token["access_token"])
+        if unverified_claims.get("scope"):
+            token_scopes = unverified_claims["scope"].split()
+        return token_scopes
+
 # @main_app.errorhandler(Exception)
 # def handle_auth_error(ex):
 #     response = jsonify(message=str(ex))
