@@ -36,13 +36,10 @@ class AuthFlask(Flask):
                 pass
             elif self.permission == 'admin':
                 f=Auth.requires_admin(f)
-            else:
-                print("Checking permission")
-                f=Auth.requires_scope("access:"+self.permission)(f)
-         
+            else:               
+                f=Auth.requires_scope("access:"+self.permission)(f)         
 
-            endpoint = options.pop("endpoint", None)
-            print("endpoint")
+            endpoint = options.pop("endpoint", None)            
             self.add_url_rule(rule, endpoint, f, **options)
             return f
         return decorator
