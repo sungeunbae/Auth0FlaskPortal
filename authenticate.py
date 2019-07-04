@@ -8,9 +8,20 @@ from dotenv import load_dotenv, find_dotenv
 from functools import wraps
 from flask import session
 from flask import redirect
+from flask import render_template
 from jose import JWTError, jwt
 from os import environ as env
+import six
 from six.moves.urllib.request import urlopen
+from werkzeug.exceptions import Unauthorized,Forbidden
+
+#from errors import *
+
+# Format error response and append status code.
+class AuthError(Exception):
+    def __init__(self, error, status_code):
+        self.error = error
+        self.status_code = status_code
 
 
 class Auth:
@@ -38,9 +49,9 @@ class Auth:
     ISSUER = "https://"+AUTH0_DOMAIN+"/"
     #Needs API setup  https://auth0.com/docs/quickstart/backend/python#validate-access-tokens
 
-    def __init__(self, app):
-        oauth = OAuth(app)
-        self.auth0 = oauth.register(
+    def __init__(self, app):       
+        self.app = app
+        self.auth0 = OAuth(app).register(
             'auth0',
             client_id=Auth.AUTH0_CLIENT_ID,
             client_secret=Auth.AUTH0_CLIENT_SECRET,
@@ -65,11 +76,7 @@ class Auth:
             token_scopes = unverified_claims["scope"].split()
         return token_scopes
 
-# @main_app.errorhandler(Exception)
-# def handle_auth_error(ex):
-#     response = jsonify(message=str(ex))
-#     response.status_code = (ex.code if isinstance(ex, HTTPException) else 500)
-#     return response
+
 
     @staticmethod
     def __fetch_mgmnt_api_token():
@@ -154,7 +161,10 @@ class Auth:
                     for token_scope in token_scopes:
                         if token_scope == required_scope:
                             return f(*args, **kwargs)
-                raise Exception({"code": "Unauthorized", "description": "You don't have access to this resource"},403)
+                #raise Exception({"code": "Unauthorized", "description": "You don't have access to this resource"},403)             
+                #render_template("404.html", error = str(e))
+                six.raise_from(Forbidden,Exception(403))
+                
                 
             return decorated
         return require_scope
@@ -164,7 +174,7 @@ class Auth:
         if constants.JWT_PAYLOAD not in session:
             return None
         token = session[constants.TOKEN_KEY]
-        token_decoded = Auth.__decode_token(token["access_token"])
+        Auth.__decode_token(token["access_token"])
         return token
 
     @staticmethod
@@ -194,8 +204,11 @@ class Auth:
                             session[constants.MGMNT_API_TOKEN] = Auth.__fetch_mgmnt_api_token()
                         
                         return f(*args, **kwargs)
-            raise Exception({"code": "Unauthorized", "description": "You don't have access to this resource"},403)
+            #raise AuthError({"code": "Forbidden", "description": "You don't have access to this resource"},403)
+            six.raise_from(Forbidden,Exception(403))
         return decorated
+
+
 
 
 

@@ -1,4 +1,4 @@
-import constants
+from constants import ACCESS_LEVELS
 import os.path
 import sys
 
@@ -18,64 +18,78 @@ from werkzeug.exceptions import Unauthorized
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 
 from authenticate import Auth
+from models import loadSession, User
+
+class FlaskPortal:
+
+    def __find_app_modules(self):
+        modules=[os.path.dirname(x).replace("/",".") for x in Path('apps').glob('*/*/__init__.py')]
+        modules=list(filter(lambda x: x.find("..")<0, modules)) #remove hidden apps
+        print(modules)
+        #dynamically import each module discovered
+        for mod in modules: 
+            import_module(mod)
+        
+        #converting the modules list to dictionary using the access level type as the key.
+        modules_dict = {}
+        for actype in ACCESS_LEVELS:
+            modules_dict[actype]= [x for x in modules if x.find("apps.{}.".format(actype))>=0]
+            modules_dict[actype].sort()
+
+        endpoint_app_dict = {}
+        all_apps_endpoints = []
+        for actype in modules_dict:
+            for app_name in modules_dict[actype]:
+                app_obj = sys.modules[app_name].app
+
+                endpoint = '/'+app_name.replace(".","/")
+                endpoint_app_dict[endpoint]=app_obj
+                all_apps_endpoints.append((endpoint,app_obj.permission,app_name))
+        return endpoint_app_dict, all_apps_endpoints
 
 
-main_app = Flask(__name__, static_url_path='/public', static_folder='./public')
 
-#collect all legit apps under "apps" directory and create a dictionary having the endpoint (eg. /devel/xxx) as the key.
+    def __init__(self):
 
-modules=[os.path.dirname(x).replace("/",".") for x in Path('apps').glob('**/__init__.py')]
+        self.app = Flask(__name__, static_url_path='/public', static_folder='./public')
 
-#dynamically import each module discovered
-for mod in modules: 
-    import_module(mod)
- 
- #converting the modules list to dictionary using the access level type as the key.
-modules_dict = {}
-for actype in constants.ACCESS_LEVELS:
-    modules_dict[actype]= [x for x in modules if x.find("apps.{}.".format(actype))>=0]
-    modules_dict[actype].sort()
+        #collect all legit apps under "apps" directory and create a dictionary having the endpoint (eg. /devel/xxx) as the key.
+        self.endpoint_app_dict, self.all_apps_endpoints = self.__find_app_modules()
 
-endpoint_app_dict = {}
-all_apps_endpoints = []
-for actype in modules_dict:
-    for app_name in modules_dict[actype]:
-        app_obj = sys.modules[app_name].app
+        print(self.endpoint_app_dict)
 
-        endpoint = '/'+app_name.replace(".","/")
-        endpoint_app_dict[endpoint]=app_obj
-        all_apps_endpoints.append((endpoint,app_obj.permission,app_name))
+        self.app.wsgi_app = DispatcherMiddleware(self.app.wsgi_app, self.endpoint_app_dict)
+        self.auth = Auth(self.app)
+      
+        self.app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://{}:{}@{}/{}'.format(Auth.MYSQL_USERNAME,Auth.MYSQL_PASSWORD,Auth.MYSQL_IP,Auth.MYSQL_DB)
+        self.app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
 
-print(endpoint_app_dict)
+        self.db = SQLAlchemy(self.app)
+        self.db.init_app(self.app)
 
-main_app.wsgi_app = DispatcherMiddleware(main_app.wsgi_app, endpoint_app_dict)
+        self.app.config.from_object(__name__)
+        self.app.secret_key = Auth.SECRET_KEY
+        self.app.debug = True
+        #SESSION_TYPE='filesystem'
+        #SESSION_PERMANENT=False
+        #Session(self.app) #supports for Server-side Session. Optional
+
+        self.dbsession = loadSession(self.app.config['SQLALCHEMY_DATABASE_URI'])
 
 
-main_app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://{}:{}@{}/{}'.format(Auth.MYSQL_USERNAME,Auth.MYSQL_PASSWORD,Auth.MYSQL_IP,Auth.MYSQL_DB)
-main_app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
 
-db = SQLAlchemy(main_app)
-db.init_app(main_app)
-
-main_app.config.from_object(__name__)
-main_app.secret_key = Auth.SECRET_KEY
-#main_app.debug = True
-#SESSION_TYPE='filesystem'
-#SESSION_PERMANENT=False
-#Session(main_app) #supports for Server-side Session. Optional
-
-auth = Auth(main_app)
+flask_portal = FlaskPortal()
+main_app = flask_portal.app
 
 
-from models import * #dbSession
 from routes import *
 from errors import *
   
 
 
-@main_app.shell_context_processor
-def make_shell_context():
-    """
-    Run `FASK_APP=app.py; flask shell` for an interpreter with local structures.
-    """
-    return {'db': db, 'User': models.User}
+# @main_app.shell_context_processor
+# def make_shell_context():
+#     """
+#     Run `FASK_APP=app.py; flask shell` for an interpreter with local structures.
+#     """
+#     return {'db': main_app.db, 'User': models.User}
