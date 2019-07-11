@@ -1,3 +1,7 @@
+from gevent import monkey
+monkey.patch_all()
+
+
 from constants import ACCESS_LEVELS
 import os.path
 import sys
@@ -19,15 +23,14 @@ from werkzeug.middleware.dispatcher import DispatcherMiddleware
 
 from authenticate import Auth
 from models import loadSession, User
-
 class FlaskPortal:
 
     def __find_app_modules(self):
         modules=[os.path.dirname(x).replace("/",".") for x in Path('apps').glob('*/*/__init__.py')]
         modules=list(filter(lambda x: x.find("..")<0, modules)) #remove hidden apps
-        print(modules)
+        print("modules:" +str(modules))
         #dynamically import each module discovered
-        for mod in modules: 
+        for mod in modules:
             import_module(mod)
         
         #converting the modules list to dictionary using the access level type as the key.
@@ -41,9 +44,8 @@ class FlaskPortal:
         for actype in modules_dict:
             for app_name in modules_dict[actype]:
                 app_obj = sys.modules[app_name].app
-
                 endpoint = '/'+app_name.replace(".","/")
-                endpoint_app_dict[endpoint]=app_obj
+                endpoint_app_dict[endpoint]=app_obj 
                 all_apps_endpoints.append((endpoint,app_obj.permission,app_name))
         return endpoint_app_dict, all_apps_endpoints
 
@@ -56,8 +58,7 @@ class FlaskPortal:
         #collect all legit apps under "apps" directory and create a dictionary having the endpoint (eg. /devel/xxx) as the key.
         self.endpoint_app_dict, self.all_apps_endpoints = self.__find_app_modules()
 
-        print(self.endpoint_app_dict)
-
+        print("endpoints:"+str(self.endpoint_app_dict))
         self.app.wsgi_app = DispatcherMiddleware(self.app.wsgi_app, self.endpoint_app_dict)
         self.auth = Auth(self.app)
       
@@ -75,7 +76,6 @@ class FlaskPortal:
         #Session(self.app) #supports for Server-side Session. Optional
 
         self.dbsession = loadSession(self.app.config['SQLALCHEMY_DATABASE_URI'])
-
 
 
 flask_portal = FlaskPortal()

@@ -12,7 +12,8 @@ class AuthFlask(Flask):
         try:
             self.permission=kwargs.pop('permission')
         except KeyError:
-            caller = sys._getframe().f_back.f_code.co_filename
+            caller = os.path.abspath(sys._getframe().f_back.f_code.co_filename)
+            print("caller: "+caller)
             try:
                 #stripping the permission part from "./apps/permission/XXXX/__init__.py"
                 caller_permission = os.path.dirname(caller).split("apps")[-1].split("/")[1] 
@@ -22,6 +23,7 @@ class AuthFlask(Flask):
             else:
                 if caller_permission in ACCESS_LEVELS:
                     self.permission = caller_permission
+                    print("Permission:"+self.permission)
                 else:
                     print("Error: {} is invalid permission.".format(caller_permission))
                     sys.exit()                  
@@ -38,10 +40,15 @@ class AuthFlask(Flask):
             elif self.permission == 'admin':
                 f=Auth.requires_admin(f)
             else:               
-                f=Auth.requires_scope("access:"+self.permission)(f)         
-
+                f=Auth.requires_scope("access:"+self.permission)(f)
+            
+            print("rule:"+str(rule))
+            print("options:"+str(options))
             endpoint = options.pop("endpoint", None)            
-            self.add_url_rule(rule, endpoint, f, **options)
+            try:
+                self.add_url_rule(rule, endpoint, f, **options)
+            except AssertionError:
+                print("WARNING: Duplicate endpoints:"+str(rule)+" "+str(options))
             return f
         return decorator
 
