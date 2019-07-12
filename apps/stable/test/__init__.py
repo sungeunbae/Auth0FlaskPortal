@@ -3,11 +3,12 @@ from authflask import AuthFlask
 fapp = AuthFlask(__name__)
 
 
-@app.route('/') 
+@app.route("/")
 def hello_world():
-        return 'Hello World from {} : You have {} permission to view this page.'.format(app.import_name, app.permission)
+    return "Hello World from {} : You have {} permission to view this page.".format(
+        app.import_name, app.permission
+    )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     app.run()
-
-
