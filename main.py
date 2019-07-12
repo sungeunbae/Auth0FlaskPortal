@@ -23,6 +23,8 @@ from werkzeug.middleware.dispatcher import DispatcherMiddleware
 
 from authenticate import Auth
 from models import loadSession, User
+from authflask import AuthFlask
+
 class FlaskPortal:
 
     def __find_app_modules(self):
@@ -43,7 +45,16 @@ class FlaskPortal:
         all_apps_endpoints = []
         for actype in modules_dict:
             for app_name in modules_dict[actype]:
-                app_obj = sys.modules[app_name].app
+                # find AuthFlask app object in the imported modules, as it can be of any name.
+                afapps = [(key,getattr(sys.modules[app_name],key)) for key in sys.modules[app_name].__dict__.keys() if type(getattr(sys.modules[app_name],key)) == AuthFlask]
+                if len(afapps) == 0:
+                    print("Warning: Found no AuthFlask app. Not loaded: {}".format(app_name))
+                    continue
+                elif len(afapps) > 1:
+                    print("Warning: Multiple AuthFlask apps were detected. Only one is loaded: {}".format(app_name))
+                else:
+                    print("Info: Found an AuthFlask app:{}.{}".format(app_name, afapps[0][0]))
+                    app_obj = afapps[0][1]
                 endpoint = '/'+app_name.replace(".","/")
                 endpoint_app_dict[endpoint]=app_obj 
                 all_apps_endpoints.append((endpoint,app_obj.permission,app_name))
@@ -58,7 +69,7 @@ class FlaskPortal:
         #collect all legit apps under "apps" directory and create a dictionary having the endpoint (eg. /devel/xxx) as the key.
         self.endpoint_app_dict, self.all_apps_endpoints = self.__find_app_modules()
 
-        print("endpoints:"+str(self.endpoint_app_dict))
+        print("endpoints: "+str(self.endpoint_app_dict))
         self.app.wsgi_app = DispatcherMiddleware(self.app.wsgi_app, self.endpoint_app_dict)
         self.auth = Auth(self.app)
       

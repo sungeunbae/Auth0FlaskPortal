@@ -35,20 +35,18 @@ class AuthFlask(Flask):
         def decorator(f):
             # This achieves the same effect as @app.route('/X') @requires_scope(xxx)
             
-            if self.permission == 'client':
+            if self.permission == 'stable':
                 pass
             elif self.permission == 'admin':
                 f=Auth.requires_admin(f)
             else:               
                 f=Auth.requires_scope("access:"+self.permission)(f)
             
-            print("rule:"+str(rule))
-            print("options:"+str(options))
             endpoint = options.pop("endpoint", None)            
             try:
                 self.add_url_rule(rule, endpoint, f, **options)
             except AssertionError:
-                print("WARNING: Duplicate endpoints:"+str(rule)+" "+str(options))
+                print("WARNING: Duplicate possibly harmless endpoints:"+str(rule)+" "+str(options))
             return f
         return decorator
 
