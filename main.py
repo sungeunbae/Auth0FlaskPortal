@@ -1,6 +1,6 @@
 from gevent import monkey
 
-monkey.patch_all()
+monkey.patch_all() # needs this as early as possible to avoid erratic behaviour
 
 
 from constants import ACCESS_LEVELS
