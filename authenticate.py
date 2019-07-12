@@ -45,7 +45,9 @@ class Auth:
 
     SCOPE = (
         "openid profile "
-    )  # groups roles permissions read:eaonly read:devonly' #we don't need to request all these scopes. All scopes authorized for the user is auto-added by the rule created by (*) above.
+    )  # All scopes authorized for the user are auto-added (without explicit request) by the rule
+    # See SPA+API: Auth0 Configuration for more details
+    # https://auth0.com/docs/architecture-scenarios/spa-api/part-2
 
     ISSUER = "https://" + AUTH0_DOMAIN + "/"
     # Needs API setup  https://auth0.com/docs/quickstart/backend/python#validate-access-tokens
@@ -85,14 +87,6 @@ class Auth:
             grant_type="client_credentials",
             audience=Auth.AUTH0_BASE_URL + "/api/v2/",
         )
-
-        # Alternatively, can use the routine below...
-        # conn = http.client.HTTPSConnection("seistech.auth0.com:443")
-        # payload = "grant_type=client_credentials&client_id="+AUTH0_CLIENT_ID+"&client_secret="+AUTH0_CLIENT_SECRET+"&audience="+auth0.api_base_url+"/api/v2/"
-        # headers = { 'content-type': "application/x-www-form-urlencoded" }
-        # conn.request("POST", "https://seistech.auth0.com/oauth/token", payload, headers)
-        # res = conn.getresponse()
-        # token = res.read().decode("utf-8")
 
         return token["access_token"]  # ok to use it without validation
 
