@@ -27,7 +27,6 @@ from authenticate import Auth
 from models import loadSession, User
 from authflask import AuthFlask
 
-
 class FlaskPortal:
     def __find_app_modules(self):
         modules = [
@@ -52,6 +51,7 @@ class FlaskPortal:
 
         endpoint_app_dict = {}
         all_apps_endpoints = []
+        bad_endpoints = ['static','.js','.css','<path:'] 
         for actype in modules_dict:
             for app_name in modules_dict[actype]:
                 # find AuthFlask app object in the imported modules, as it can be of any name.
@@ -79,10 +79,27 @@ class FlaskPortal:
                             app_name, afapps[0][0]
                         )
                     )
-                    app_obj = afapps[0][1]
+                app_obj = afapps[0][1]
                 endpoint = "/" + app_name.replace(".", "/")
                 endpoint_app_dict[endpoint] = app_obj
-                all_apps_endpoints.append((endpoint, app_obj.permission, app_name))
+
+                ## collect all "good" endpoints to display on the dashboard
+#                all_apps_endpoints.append((endpoint, app_obj.permission, app_name)) #root endpoint will be added by the code below anyway
+                subendpoints = list(set(['%s' % rule for rule in app_obj.url_map.iter_rules()])) #remove duplicates
+                filtered_subendpoints = []
+                for rule in subendpoints: #remove bad endpoints
+                    count = 0
+                    for pattern in bad_endpoints:
+                        if rule.find(pattern)>=0:
+                            break
+                        else:
+                            count+=1
+                    if count==len(bad_endpoints):
+                        filtered_subendpoints.append(rule)
+                subendpoints = filtered_subendpoints
+                print(subendpoints)
+                for ep in subendpoints:
+                    all_apps_endpoints.append((endpoint+ep, app_obj.permission, app_name+ep))
         return endpoint_app_dict, all_apps_endpoints
 
     def __init__(self):

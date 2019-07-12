@@ -1,6 +1,6 @@
 from authflask import AuthFlask
 
-fapp = AuthFlask(__name__)
+app = AuthFlask(__name__)
 
 
 @app.route("/")
