@@ -3,7 +3,7 @@ Auth0-integrated Flask Portal that hosts child Flask applications with implicit 
 
 # Introduction
 
-Auth0 (www.auth0.com)is a commercial Authentication SaaS (Software-as-a-service). Auth0FlaskPortal integrates Auth0 and its Authorization Extension to support multiple levels of access control during the Flask-based website development stages allowing the Flask web-app developer to focus on the core function without worrying about the security or business logic.
+Auth0 (www.auth0.com) is a commercial Authentication SaaS (Software-as-a-service). Auth0FlaskPortal integrates Auth0 and its Authorization Extension to support multiple levels of access control during the Flask-based website development stages allowing the Flask web-app developer to focus on the core function without worrying about the security or business logic.
 
 # What this can do
 1. Hosting multiple Flask-based web applications via dispatching by a path on the URL.
