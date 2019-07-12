@@ -11,9 +11,11 @@ Auth0 (www.auth0.com)is a commercial Authentication SaaS (Software-as-a-service)
 3. Supports Websocket (https://flask-socketio.readthedocs.io/en/latest/)
 4. Automatically detects all the available child Flask apps and adds to the Application Dispatcher (http://flask.pocoo.org/docs/0.12/patterns/appdispatch) based on Werkzeug middleware (https://werkzeug.palletsprojects.com/en/0.15.x/middleware/dispatcher/ ) (Note: Minimal code change to the Flask app is needed. See below)
 5. Through Auth0 Authorization Extension's Group hierarchy feature, a user with higher access-level can access applications requiring lower access-level.
+6. Extends Auth0's basic User DB and can mange extra User info in a separate DB
 
 # Architecture
 Child Flask applications are placed under `/apps/{devel,ea,stable}`.
+![](https://wiki.canterbury.ac.nz/display/QuakeCore/SeisFinder+Architecture?preview=/68879592/71403613/D0262058-DFCD-43F8-8B40-ED7AB7A2D473.jpeg)
 
 # Setting up a child Flask application
 1. Place the code under `/apps/{devel,ea,stable}/` depending on the maturity of the code. Let's assume the application name is `APP` which is in Early adopter testing stage. Your code will be located at `/apps/ea/APP`
