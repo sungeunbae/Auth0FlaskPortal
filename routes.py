@@ -35,6 +35,7 @@ def callback_handling():
 
     session[JWT_PAYLOAD] = userinfo
     session[TOKEN_KEY] = token
+    print(token)
     user_id = get_user_id()
 
     # this_user = dbsession.query(User).filter_by(id=user_id).first()
@@ -71,16 +72,6 @@ def logout():
     )
 
 
-def __translate_access_level(access_level):
-    user_level = "User level: "
-    if "admin" in access_level:
-        user_level += "Almighty Admin"
-    elif "ea" in access_level:
-        user_level += "Early Adopter"
-    else:
-        user_level += "Paid User"
-    return user_level
-
 
 @flask_portal.app.route("/dashboard")
 @Auth.requires_auth
@@ -91,11 +82,22 @@ def dashboard():
         for (ep, acl, name) in flask_portal.all_apps_endpoints
         if acl in access_level
     ]
+    def __translate_access_level(access_level):
+        user_level = ""
+        if "admin" in access_level:
+            user_level += "Devel/Admin"
+        elif "ea" in access_level:
+            user_level += "Early Adopter"
+        else:
+            user_level += "Paid User"
+        return user_level
+
     priv_string = __translate_access_level(access_level)
     return render_template(
         "dashboard.html",
         userinfo=session[JWT_PAYLOAD],
-        userinfo_pretty=json.dumps(priv_string, indent=4),
+        #userinfo_pretty=json.dumps(priv_string, indent=4),
+        accesslevel=priv_string,
         products=filtered_apps_endpoints,
     )
 
