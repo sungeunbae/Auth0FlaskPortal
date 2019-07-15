@@ -8,7 +8,7 @@ Auth0 (www.auth0.com) is a commercial Authentication SaaS (Software-as-a-service
 # What this can do
 1. Hosting multiple Flask-based web applications via dispatching by a path on the URL.
 2. Depending on the location of the child Flask application code (eg. `/apps/stable`, `/apps/ea/`, `/apps/devel/`), access to each application is protected by the global Auth0 setup without adding extra code or a decorator to the endpoints.
-3. Supports Websocket (https://flask-socketio.readthedocs.io/en/latest/) (Note: Needs a little care)
+3. Supports Websocket (https://flask-socketio.readthedocs.io/en/latest/). (See https://stackoverflow.com/a/56980392/2005856 for more details.)
 4. Automatically detects all the available child Flask apps and adds to the Application Dispatcher (http://flask.pocoo.org/docs/0.12/patterns/appdispatch) based on Werkzeug middleware (https://werkzeug.palletsprojects.com/en/0.15.x/middleware/dispatcher/ ) (Note: Minimal code change to the Flask app is needed. See below)
 5. Through Auth0 Authorization Extension's Nested group feature, a user with higher access-level can access applications requiring lower access-level.
 6. Extends Auth0's basic User DB and can mange extra User info in a separate customized DB
