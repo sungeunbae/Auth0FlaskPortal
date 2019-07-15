@@ -3,15 +3,15 @@ Auth0-integrated Flask Portal that hosts child Flask applications with implicit 
 
 # Introduction
 
-Auth0 (www.auth0.com) is a commercial Authentication SaaS (Software-as-a-service). Auth0FlaskPortal integrates Auth0 and its Authorization Extension to support multiple levels of access control during the Flask-based website development stages allowing the Flask web-app developer to focus on the core function without worrying about the security or business logic.
+Auth0 (www.auth0.com) is a commercial Authentication SaaS (Software-as-a-service). Auth0FlaskPortal integrates Auth0 and its Authorization Extension to support multiple levels of access control whose need arises during the rapid development phase of Flask web apps. By doing so, it allows the app developer to focus on the core function without worrying about the security or business logic.
 
 # What this can do
 1. Hosting multiple Flask-based web applications via dispatching by a path on the URL.
 2. Depending on the location of the child Flask application code (eg. `/apps/stable`, `/apps/ea/`, `/apps/devel/`), access to each application is protected by the global Auth0 setup without adding extra code or a decorator to the endpoints.
-3. Supports Websocket (https://flask-socketio.readthedocs.io/en/latest/)
+3. Supports Websocket (https://flask-socketio.readthedocs.io/en/latest/). (See https://stackoverflow.com/a/56980392/2005856 for more details.)
 4. Automatically detects all the available child Flask apps and adds to the Application Dispatcher (http://flask.pocoo.org/docs/0.12/patterns/appdispatch) based on Werkzeug middleware (https://werkzeug.palletsprojects.com/en/0.15.x/middleware/dispatcher/ ) (Note: Minimal code change to the Flask app is needed. See below)
-5. Through Auth0 Authorization Extension's Group hierarchy feature, a user with higher access-level can access applications requiring lower access-level.
-6. Extends Auth0's basic User DB and can mange extra User info in a separate DB
+5. Through Auth0 Authorization Extension's Nested group feature, a user with higher access-level can access applications requiring lower access-level.
+6. Extends Auth0's basic User DB and can mange extra User info in a separate customized DB
 
 # Architecture
 Child Flask applications are placed under `/apps/{devel,ea,stable}`.
@@ -78,7 +78,7 @@ Link a group with a relevant role.
 
 ![](public/img/auth_extension_group_ea_roles.png)
 
-Groups can be nested, and inherit the permission. This is a unique feature in Auth0 (not found in Amazon Cognito)
+Groups can be nested, and all the permissions assigned to one group are inherited through nested group mechanism. This is a unique feature in Auth0 (not found in Amazon Cognito), which allows a user with high access-level can automatically access material needing lower access-level.
 
 ![](public/img/auth_extension_group_ea_nested_groups.png)
 
