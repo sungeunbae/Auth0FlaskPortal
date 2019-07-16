@@ -34,5 +34,5 @@ MGMNT_API_TOKEN = "mgmnt_api_token"
 
 ACCESS_LEVELS = ["admin", "devel", "ea", "stable"]
 
-LOG_FILE="logs/portal.log"
-TIMEZONE="Pacific/Auckland"
+LOG_FILE = "logs/portal.log"
+TIMEZONE = "Pacific/Auckland"

@@ -72,7 +72,6 @@ def logout():
     )
 
 
-
 @flask_portal.app.route("/dashboard")
 @Auth.requires_auth
 def dashboard():
@@ -82,6 +81,7 @@ def dashboard():
         for (ep, acl, name) in flask_portal.all_apps_endpoints
         if acl in access_level
     ]
+
     def __translate_access_level(access_level):
         user_level = ""
         if "admin" in access_level:
@@ -96,7 +96,7 @@ def dashboard():
     return render_template(
         "dashboard.html",
         userinfo=session[JWT_PAYLOAD],
-        #userinfo_pretty=json.dumps(priv_string, indent=4),
+        # userinfo_pretty=json.dumps(priv_string, indent=4),
         accesslevel=priv_string,
         products=filtered_apps_endpoints,
     )
