@@ -17,6 +17,16 @@ Auth0 (www.auth0.com) is a commercial Authentication SaaS (Software-as-a-service
 Child Flask applications are placed under `/apps/{devel,ea,stable}`.
 ![](public/img/Auth0FlaskPortal_architecture.png)
 
+# Installation
+```
+pip install -r requirements.txt
+```
+and run with
+```
+./run_server.sh
+```
+You might wish to update `PYTHONPATH` in `run_server.sh`
+
 # Setting up a child Flask application
 1. Place the code under `/apps/{devel,ea,stable}/` depending on the maturity of the code. Let's assume the application name is `APP` which is in Early adopter testing stage. Your code will be located at `/apps/ea/APP`
 2. Make sure there is `__init__.py` under `/apps/ea/APP` which exposes the Flask app object and all its routes. If  the Flask object and routes are all defined in `__init__.py`, no change is needed. Otherwise, import them into `__init__.py`. Suppose there are created in `APP/web/app.py` and `APP/web/routes.py`, your `__init__.py` should look like below.
