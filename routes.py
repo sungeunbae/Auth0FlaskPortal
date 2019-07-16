@@ -35,7 +35,7 @@ def callback_handling():
 
     session[JWT_PAYLOAD] = userinfo
     session[TOKEN_KEY] = token
-    print(token)
+    flask_portal.app.logger.debug(token)
     user_id = get_user_id()
 
     # this_user = dbsession.query(User).filter_by(id=user_id).first()

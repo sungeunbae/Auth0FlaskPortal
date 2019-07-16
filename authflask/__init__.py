@@ -1,37 +1,60 @@
 from flask import Flask
 
+import logging
 import sys
 import os.path
 
 from authenticate import Auth
 from constants import ACCESS_LEVELS
-
+from tzlogging import TZLogger
 
 class AuthFlask(Flask):
     def __init__(self, *args, **kwargs):
+        self.permission = None
         try:
             self.permission = kwargs.pop("permission")
         except KeyError:
+            pass
+            #will work out the permission from the directory name
+
+        super().__init__(*args, **kwargs) #create a narmal Flask object
+
+        debug_msg ="" #logger is yet to be created. Add to the string variable for now
+        error_msg = ""
+        #find out the permission and app name
+        if self.permission is None:
             caller = os.path.abspath(sys._getframe().f_back.f_code.co_filename)
-            print("caller: " + caller)
+            debug_msg +="caller: " + caller + '\n'
             try:
                 # stripping the permission part from "./apps/permission/XXXX/__init__.py"
-                caller_permission = (
-                    os.path.dirname(caller).split("apps")[-1].split("/")[1]
+                caller_permission, app_name = (
+                    os.path.dirname(caller).split("apps")[-1].split("/")[1:3]
                 )
             except IndexError:
-                print("Error: Caller {} has no clue of permission".format(caller))
-                sys.exit()
+                error_msg+="Caller {} has no clue of permission".format(caller) + '\n'
             else:
                 if caller_permission in ACCESS_LEVELS:
                     self.permission = caller_permission
-                    print("Permission:" + self.permission)
+                    debug_msg += "Permission:" + self.permission + '\n'
                 else:
-                    print("Error: {} is invalid permission.".format(caller_permission))
-                    sys.exit()
+                    error_msg +="{} is invalid permission.".format(caller_permission) + '\n'
+                self.app_name = app_name
+        try:
+            log_name = "logs/{}_{}.log".format(self.permission, self.app_name)
+        except AttributeError: #self.app_name may not have been set
+            log_name = "logs/{}_temp.log".format(self.permission)
 
-        super().__init__(*args, **kwargs)
+        #add a logger
+        self.logger=TZLogger(__name__, log_name).getLogger()
+
+        if debug_msg:
+            self.logger.debug(debug_msg)
+        if error_msg:
+            self.logger.error(error_msg)
+            sys.exit()
+
         self.secret_key = Auth.SECRET_KEY
+                
 
     def route(self, rule, **options):
         def decorator(f):
@@ -48,8 +71,8 @@ class AuthFlask(Flask):
             try:
                 self.add_url_rule(rule, endpoint, f, **options)
             except AssertionError:
-                print(
-                    "WARNING: Duplicate possibly harmless endpoints:"
+                self.logger.warning(
+                    "Duplicate possibly harmless endpoints:"
                     + str(rule)
                     + " "
                     + str(options)

@@ -3,7 +3,8 @@ from gevent import monkey
 monkey.patch_all()  # needs this as early as possible to avoid erratic behaviour
 
 
-from constants import ACCESS_LEVELS
+from constants import ACCESS_LEVELS,LOG_FILE
+import logging
 import os.path
 import sys
 
@@ -16,6 +17,7 @@ from flask_session import Session
 # from flask import session
 
 from importlib import import_module
+from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
 from werkzeug.exceptions import NotFound
@@ -26,7 +28,7 @@ from werkzeug.middleware.dispatcher import DispatcherMiddleware
 from authenticate import Auth
 from models import loadSession, User
 from authflask import AuthFlask
-
+from tzlogging import TZLogger
 
 class FlaskPortal:
     def __find_app_modules(self):
@@ -37,7 +39,8 @@ class FlaskPortal:
         modules = list(
             filter(lambda x: x.find("..") < 0, modules)
         )  # remove hidden apps
-        print("modules:" + str(modules))
+
+        self.app.logger.info("modules:" + str(modules))
         # dynamically import each module discovered
         for mod in modules:
             import_module(mod)
@@ -62,20 +65,20 @@ class FlaskPortal:
                     if type(getattr(sys.modules[app_name], key)) == AuthFlask
                 ]
                 if len(afapps) == 0:
-                    print(
-                        "Warning: Found no AuthFlask app. Not loaded: {}".format(
+                    self.app.logger.warning(
+                        "Found no AuthFlask app. Not loaded: {}".format(
                             app_name
                         )
                     )
                     continue
                 elif len(afapps) > 1:
-                    print(
-                        "Warning: Multiple AuthFlask apps were detected. Only one is loaded: {}".format(
+                    self.app.logger.warning(
+                        "Multiple AuthFlask apps were detected. Only one is loaded: {}".format(
                             app_name
                         )
                     )
                 else:
-                    print(
+                    self.app.logger.info(
                         "Info: Found an AuthFlask app:{}.{}".format(
                             app_name, afapps[0][0]
                         )
@@ -100,7 +103,7 @@ class FlaskPortal:
                     if count == len(bad_endpoints):
                         filtered_subendpoints.append(rule)
                 subendpoints = filtered_subendpoints
-                print(subendpoints)
+                self.app.logger.info(subendpoints)
                 for ep in subendpoints:
                     all_apps_endpoints.append(
                         (endpoint + ep, app_obj.permission, app_name + ep)
@@ -111,10 +114,13 @@ class FlaskPortal:
 
         self.app = Flask(__name__, static_url_path="/public", static_folder="./public")
 
+        # add a logging handler to the app
+        self.app.logger=TZLogger(__name__,LOG_FILE).getLogger()
+
         # collect all legit apps under "apps" directory and create a dictionary having the endpoint (eg. /devel/xxx) as the key.
         self.endpoint_app_dict, self.all_apps_endpoints = self.__find_app_modules()
 
-        print("endpoints: " + str(self.endpoint_app_dict))
+        self.app.logger.info("endpoints: " + str(self.endpoint_app_dict))
         self.app.wsgi_app = DispatcherMiddleware(
             self.app.wsgi_app, self.endpoint_app_dict
         )
