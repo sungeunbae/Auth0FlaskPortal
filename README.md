@@ -15,7 +15,7 @@ Auth0 (www.auth0.com) is a commercial Authentication SaaS (Software-as-a-service
 
 # Architecture
 Child Flask applications are placed under `/apps/{devel,ea,stable}`.
-![](public/img/Auth0FlaskPortal_architecture.png)
+![](static/img/Auth0FlaskPortal_architecture.png)
 
 # Installation
 ```
@@ -70,38 +70,38 @@ All AUTH0... properties can be obtained from your Auth0 Dashboard>Applications>"
 
 For group-based access-level control, you need to install Authorization Extension. Go to Extensions page to install it.
 
-![](public/img/auth_extension_install.png)
+![](static/img/auth_extension_install.png)
 
 Configure Authorization Extension. There are 3 steps of authorization. First, define permissions.
 
-![](public/img/auth_extension_permissions.png)
+![](static/img/auth_extension_permissions.png)
 
 And create roles associated with the permission that we defined.
 
-![](public/img/auth_extension_roles.png)
+![](static/img/auth_extension_roles.png)
 
 Then create groups that assume such roles.
 
-![](public/img/auth_extension_groups.png)
+![](static/img/auth_extension_groups.png)
 
 Link a group with a relevant role.
 
-![](public/img/auth_extension_group_ea_roles.png)
+![](static/img/auth_extension_group_ea_roles.png)
 
 Groups can be nested, and all the permissions assigned to one group are inherited through nested group mechanism. This is a unique feature in Auth0 (not found in Amazon Cognito), which allows a user with high access-level can automatically access material needing lower access-level.
 
-![](public/img/auth_extension_group_ea_nested_groups.png)
+![](static/img/auth_extension_group_ea_nested_groups.png)
 
 When a new user is created, add the user to a group, then all the roles and permissions are automatically assigned to the user.
 
 As we have created the groups, roles and permissions, we now wish to make sure the user gets a JWT that contains scopes like "access:devel", "access:ea", "access:admin". This can be done by creating a "Rule" (See [SPA + API: Auth0 Configuration In this article] (https://auth0.com/docs/architecture-scenarios/spa-api/part-2) for more info)
 
-![](public/img/rules.png)
+![](static/img/rules.png)
 
-![](public/img/rules_access_token_scopes.png)
+![](static/img/rules_access_token_scopes.png)
 
 By default, user info is hosted by Auth0's own DB. The details of user info is just enough for authentication purposes, not enough for implementing any advanced business logic. You can create your own DB (such as MySQL, MariaDB etc) with a User table that stays in sync with Auth0 User table and contains extra information of users. To do this, you need to create a "Hook".
 
-![](public/img/hooks_post_user_registration.png)
+![](static/img/hooks_post_user_registration.png)
 
-![](public/img/hooks_post_user_registration_code.png)
+![](static/img/hooks_post_user_registration_code.png)
