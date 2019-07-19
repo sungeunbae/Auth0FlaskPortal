@@ -3,7 +3,6 @@ setuptools==41.0.1
 pytest==3.10.1
 Flask_SQLAlchemy==2.4.0
 gevent==1.4.0
-mpi4py==2.0.0
 numpy==1.16.1
 six==1.12.0
 pandas==0.24.2
@@ -18,7 +17,9 @@ authlib==0.11
 python-dotenv==0.10.3
 flask_cors==3.0.8
 flask_session==0.3.1
-jose==1.0.0
 qcore==0.5.1
 typing==3.7.4
 PyYAML==5.1.1
+python-jose==3.0.1
+pymysql==0.9.3
+matplotlib==3.1.1

@@ -85,11 +85,13 @@ def dashboard():
     def __translate_access_level(access_level):
         user_level = ""
         if "admin" in access_level:
-            user_level += "Devel/Admin"
+            user_level += "Admin"
+        elif "devel" in access_level:
+            user_level += "Developer"
         elif "ea" in access_level:
             user_level += "Early Adopter"
         else:
-            user_level += "Paid User"
+            user_level += "User"
         return user_level
 
     priv_string = __translate_access_level(access_level)
