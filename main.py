@@ -112,7 +112,7 @@ class FlaskPortal:
 
     def __init__(self):
 
-        self.app = Flask(__name__, static_url_path="/public", static_folder="./public")
+        self.app = Flask(__name__, static_url_path="/static", static_folder="./static")
 
         # add a logging handler to the app
         self.app.logger=TZLogger(__name__,LOG_FILE).getLogger()
