@@ -67,7 +67,9 @@ class Auth:
     def get_access_level(self):
         scopes = self.__get_scopes()
         access_level = [x.split("access:")[1] for x in scopes if x.find("access:") >= 0]
-        return ["stable"] + access_level #all authenticated users have "stable" access level
+        return [
+            "stable"
+        ] + access_level  # all authenticated users have "stable" access level
 
     def __get_scopes(self):
         token_scopes = []

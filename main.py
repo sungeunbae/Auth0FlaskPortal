@@ -3,7 +3,7 @@ from gevent import monkey
 monkey.patch_all()  # needs this as early as possible to avoid erratic behaviour
 
 
-from constants import ACCESS_LEVELS,LOG_FILE
+from constants import ACCESS_LEVELS, LOG_FILE
 import logging
 import os.path
 import sys
@@ -29,6 +29,7 @@ from authenticate import Auth
 from models import loadSession, User
 from authflask import AuthFlask
 from tzlogging import TZLogger
+
 
 class FlaskPortal:
     def __find_app_modules(self):
@@ -66,9 +67,7 @@ class FlaskPortal:
                 ]
                 if len(afapps) == 0:
                     self.app.logger.warning(
-                        "Found no AuthFlask app. Not loaded: {}".format(
-                            app_name
-                        )
+                        "Found no AuthFlask app. Not loaded: {}".format(app_name)
                     )
                     continue
                 elif len(afapps) > 1:
@@ -115,7 +114,7 @@ class FlaskPortal:
         self.app = Flask(__name__, static_url_path="/static", static_folder="./static")
 
         # add a logging handler to the app
-        self.app.logger=TZLogger(__name__,LOG_FILE).getLogger()
+        self.app.logger = TZLogger(__name__, LOG_FILE).getLogger()
 
         # collect all legit apps under "apps" directory and create a dictionary having the endpoint (eg. /devel/xxx) as the key.
         self.endpoint_app_dict, self.all_apps_endpoints = self.__find_app_modules()
