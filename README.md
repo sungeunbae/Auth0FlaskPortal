@@ -1,3 +1,5 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) 
+
 # Auth0FlaskPortal
 Auth0-integrated Flask Portal that hosts child Flask applications with implicit Auth0 support
 
