@@ -19,7 +19,7 @@ flask_cors==3.0.8
 flask_session==0.3.1
 qcore==0.5.1
 typing==3.7.4
-PyYAML==5.1.1
+PyYAML==5.4
 python-jose==3.0.1
 pymysql==0.9.3
 matplotlib==3.1.1
