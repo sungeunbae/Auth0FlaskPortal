@@ -15,7 +15,7 @@ pytz==2019.1
 Flask_SocketIO==4.1.0
 authlib==0.11
 python-dotenv==0.10.3
-flask_cors==3.0.8
+flask_cors==3.0.9
 flask_session==0.3.1
 qcore==0.5.1
 typing==3.7.4
